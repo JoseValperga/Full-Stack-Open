@@ -25,35 +25,35 @@ const App = () => {
     setTotalClicls(good + neutral + updatedBad);
   };
 
+  const StatisticLine = ({ text, value }) => {
+    return (
+      <div>
+        {text}
+        {value}
+      </div>
+    );
+  };
+
   const Statisctics = ({ good, neutral, bad, totalClicks }) => {
+    const goodValue = 1;
+    const badValue = -1;
+
+    const average = (good * goodValue + bad * badValue) / totalClicks;
+    const positive = (good * goodValue) / totalClicks;
+
     if (totalClicks === 0) {
       return "No feedback given";
     }
-    
+
     return (
-      <ul>
-        <li>
-          {"good"} {good}
-        </li>
-        <li>
-          {"neutral"} {neutral}
-        </li>
-        <li>
-          {"bad"} {bad}
-        </li>
-        <li>
-          {"all"} {totalClicks}
-        </li>
-        <li>
-          {"average "}
-          {totalClicks > 0 ? (good * 1 + bad * -1) / totalClicks : " "}
-        </li>
-        <li>
-          {"positive "}
-          {totalClicks > 0 ? ((good * 1) / totalClicks) * 100 : " "}
-          {"%"}
-        </li>
-      </ul>
+      <div>
+        <StatisticLine text={"good "} value={good} />
+        <StatisticLine text={"neutral "} value={neutral} />
+        <StatisticLine text={"bad "} value={bad} />
+        <StatisticLine text={"all "} value={totalClicks} />
+        <StatisticLine text={"average "} value={average} />
+        <StatisticLine text={"positive "} value={positive} />
+      </div>
     );
   };
 
