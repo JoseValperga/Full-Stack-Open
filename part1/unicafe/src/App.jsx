@@ -26,11 +26,15 @@ const App = () => {
   };
 
   const StatisticLine = ({ text, value }) => {
+    const newValue = Number.isInteger(value)
+      ? value
+      : parseFloat(value.toFixed(1));
+
     return (
-      <div>
-        {text}
-        {value}
-      </div>
+      <tr>
+        <td>{text}</td>
+        <td>{text !== "positive " ? newValue : newValue + "%"}</td>
+      </tr>
     );
   };
 
@@ -39,21 +43,23 @@ const App = () => {
     const badValue = -1;
 
     const average = (good * goodValue + bad * badValue) / totalClicks;
-    const positive = (good * goodValue) / totalClicks;
+    const positive = (good * goodValue * 100) / totalClicks;
 
     if (totalClicks === 0) {
       return "No feedback given";
     }
 
     return (
-      <div>
-        <StatisticLine text={"good "} value={good} />
-        <StatisticLine text={"neutral "} value={neutral} />
-        <StatisticLine text={"bad "} value={bad} />
-        <StatisticLine text={"all "} value={totalClicks} />
-        <StatisticLine text={"average "} value={average} />
-        <StatisticLine text={"positive "} value={positive} />
-      </div>
+      <table>
+        <tbody>
+          <StatisticLine text={"good "} value={good} />
+          <StatisticLine text={"neutral "} value={neutral} />
+          <StatisticLine text={"bad "} value={bad} />
+          <StatisticLine text={"all "} value={totalClicks} />
+          <StatisticLine text={"average "} value={average} />
+          <StatisticLine text={"positive "} value={positive} />
+        </tbody>
+      </table>
     );
   };
 
