@@ -16,19 +16,45 @@ const App = () => {
     "The only way to go fast, is to go well.",
   ];
 
+  const [selected, setSelected] = useState(0);
+
+  const cantidadElementos = anecdotes.length;
+  const [points, setPoints] = useState(new Array(cantidadElementos).fill(0));
+
   const handleRandomClick = () => {
     const randomdNumber = Math.floor(Math.random() * anecdotes.length);
     setSelected(randomdNumber);
   };
 
-  const [selected, setSelected] = useState(0);
+  const handleVoteClick = () => {
+    const copy = [...points];
+    copy[selected] += 1;
+    const updatedCopy = copy;
+    setPoints(updatedCopy);
+  };
 
+  const maxNumber = Math.max(...points);
+  const indexOfMax = points.indexOf(maxNumber);
+  const elementWithMaxValue = anecdotes[indexOfMax];
+  
   return (
     <div>
+      <h2>Anecdote of the day</h2>
       <div>{anecdotes[selected]}</div>
-      <Button handleClick={handleRandomClick} text={"next anecdote"} />
+      <div>{`has ${points[selected]} votes`}</div>
+      <Button handleClick={handleVoteClick} text="vote" />
+      <Button handleClick={handleRandomClick} text="next anecdote" />
+  
+      {maxNumber > 0 && (
+        <>
+          <h2>Anecdote with most votes</h2>
+          <div>{elementWithMaxValue}</div>
+          <div>{`has ${maxNumber} votes`}</div>
+        </>
+      )}
     </div>
   );
+  
 };
 
 export default App;
