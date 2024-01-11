@@ -6,7 +6,7 @@ sequenceDiagram
     activate server
     server->>browser: HTTP status code 302. This is a URL redirect-> new HTTP GET request to the address defined in the Location of the header -> https://studies.cs.helsinki.fi/exampleapp/notes. The browser will reloads the Notes page.
     deactivate server
-        
+
     Note: The data is sent to the server with the form submission, and the server instructs the browser to reload the Notes page with a redirect. 
     
     browser->>server: The browser reloads the Notes page -> GET https://studies.cs.helsinki.fi/exampleapp/notes   
@@ -31,4 +31,4 @@ sequenceDiagram
     server-->>browser: [{ "content": "HTML is easy", "date": "2023-1-1" }, ... ]
     deactivate server
 
-    Note right of browser: The browser executes the callback function that renders the notes
+    Note right of browser: The browser executes the callback function that renders the notes.
