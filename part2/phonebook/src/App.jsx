@@ -22,7 +22,8 @@ const App = () => {
       window.alert(`${personObject.name} is already added to phonebook`);
       return;
     }
-
+    const id = persons.length + 1;
+    personObject.id = id;
     setFilteredPersons(persons.concat(personObject));
     setPersons(persons.concat(personObject));
   };
