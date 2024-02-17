@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const Form = ({ addPerson }) => {
+const Form = ({ addPerson, persons, setPersons, setFilteredPersons }) => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
 
@@ -14,7 +14,8 @@ const Form = ({ addPerson }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    addPerson({ name: newName, number: newNumber });
+    const personObject = { name: newName, number: newNumber };
+    addPerson(personObject, persons, setPersons, setFilteredPersons);
     setNewName("");
     setNewNumber("");
   };

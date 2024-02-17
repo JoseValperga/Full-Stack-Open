@@ -3,6 +3,7 @@ import Form from "./components/Form";
 import Filter from "./components/Filter";
 import Numbers from "./components/Numbers";
 import formService from "./services/form";
+import addPerson from "./components/AddPerson";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -15,29 +16,18 @@ const App = () => {
 
   const [filteredPersons, setFilteredPersons] = useState([...persons]);
 
-  const addPerson = (personObject) => {
-    const isRepeated = persons.find(
-      (object) => object.name === personObject.name
-    );
-
-    if (isRepeated) {
-      window.alert(`${personObject.name} is already added to phonebook`);
-      return;
-    }
-
-    formService.create(personObject).then((personAdded) => {
-      setFilteredPersons(persons.concat(personAdded));
-      setPersons(persons.concat(personAdded));
-    });
-  };
-
   return (
     <div>
       <h2>Phonebook</h2>
       <Filter persons={persons} setFilteredPersons={setFilteredPersons} />
 
       <h2>add a new</h2>
-      <Form addPerson={addPerson} />
+      <Form
+        addPerson={addPerson}
+        persons={persons}
+        setPersons={setPersons}
+        setFilteredPersons={setFilteredPersons}
+      />
 
       <h2>Numbers</h2>
       <Numbers
