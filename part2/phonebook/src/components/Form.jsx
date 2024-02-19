@@ -1,6 +1,13 @@
 import { useState } from "react";
 
-const Form = ({ addPerson, persons, setPersons, setFilteredPersons }) => {
+const Form = ({
+  addPerson,
+  persons,
+  setPersons,
+  setFilteredPersons,
+  setAddedMessage,
+  setErrorMessage,
+}) => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
 
@@ -15,7 +22,14 @@ const Form = ({ addPerson, persons, setPersons, setFilteredPersons }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const personObject = { name: newName, number: newNumber };
-    addPerson(personObject, persons, setPersons, setFilteredPersons);
+    addPerson(
+      personObject,
+      persons,
+      setPersons,
+      setFilteredPersons,
+      setAddedMessage,
+      setErrorMessage
+    );
     setNewName("");
     setNewNumber("");
   };

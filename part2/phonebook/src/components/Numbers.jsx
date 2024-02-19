@@ -6,6 +6,7 @@ const Numbers = ({
   persons,
   setPersons,
   setFilteredPersons,
+  setErrorMessage
 }) => {
   const idPersonToDelete = ({ id, name }) => {
     if (window.confirm(`Delete ${name}?`))
@@ -14,7 +15,11 @@ const Numbers = ({
         setFilteredPersons(
           filteredPersons.filter((n) => n.id !== respuesta.id)
         );
-      });
+      }).catch((error)=>{
+        setErrorMessage(error.message);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);});
   };
 
   return (
