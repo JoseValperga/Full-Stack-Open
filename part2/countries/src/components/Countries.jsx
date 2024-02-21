@@ -27,7 +27,6 @@ const Countries = ({ countries }) => {
       });
   }, [apiKey, URL, name]);
 
-  console.log("icon", icon);
   if (icon) {
     return (
       <div>
