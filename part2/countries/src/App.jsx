@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Languages from "./components/Languages";
+//import Languages from "./components/Languages";
+import Countries from "./components/Countries";
 
 const App = () => {
   const [country, setCountry] = useState("");
@@ -36,22 +37,7 @@ const App = () => {
           ))}
         </ul>
       )}
-      {countries.length === 1 && (
-        <div>
-          {countries.map((countryData) => (
-            <div key={countryData.name.common}>
-              <h2>{countryData.name.common}</h2>
-              <p>Capital: {countryData.capital}</p>
-              <p>Population: {countryData.population}</p>
-              <p>Region: {countryData.region}</p>
-              <p>Area: {countryData.area}</p>
-              <h3>Languajes</h3>
-              <Languages languages={countryData.languages} />
-              <img src={countryData.flags.png} alt="Country flag" />
-            </div>
-          ))}
-        </div>
-      )}
+      {countries.length === 1 && <Countries countries={countries} />}
     </div>
   );
 };
