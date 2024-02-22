@@ -1,8 +1,19 @@
 const express = require("express");
 const app = express();
 const PORT = 3001;
+const morgan = require("morgan");
 
 app.use(express.json());
+
+morgan.token('req-body', (req) => {
+  if(req.method === 'POST') {
+    return JSON.stringify(req.body);
+  } else {
+    return '';
+  }
+});
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :req-body'));
 
 let persons = [
   {
@@ -68,11 +79,12 @@ app.post("/api/persons", (request, response) => {
     return response.status(409).json({ error: "Name must be unique" });
   }
 
-  person.id = Math.trunc(Math.random() * 10000);
-  persons.push(person);
-
-  response.status(201).json(person);
+  const newPerson = { name, number };
+  newPerson.id = Math.trunc(Math.random() * 10000);
+  persons.push(newPerson);
+  response.status(201).json(newPerson);
 });
+
 
 app.listen(PORT);
 console.log(`Server running on port ${PORT}`);
