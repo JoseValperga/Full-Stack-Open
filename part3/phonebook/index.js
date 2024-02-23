@@ -41,7 +41,7 @@ let persons = [
 ];
 
 app.get("/",(request,response)=>{
-  response.sen("Hello world!")
+  response.send("Hello world!")
 })
 
 app.get("/api/persons", (request, response) => {
