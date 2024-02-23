@@ -39,8 +39,9 @@ let persons = [
     number: "39-23-6423122",
   },
 ];
-app.get("/",(res,req)=>{
-  res.sen("Hello world!")
+
+app.get("/",(request,response)=>{
+  response.sen("Hello world!")
 })
 
 app.get("/api/persons", (request, response) => {
