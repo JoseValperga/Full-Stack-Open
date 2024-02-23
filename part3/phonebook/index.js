@@ -1,8 +1,10 @@
 const express = require("express");
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001
 const morgan = require("morgan");
+const cors = require('cors')
 
+app.use(cors())
 app.use(express.json());
 
 morgan.token('req-body', (req) => {
@@ -37,6 +39,9 @@ let persons = [
     number: "39-23-6423122",
   },
 ];
+app.get("/",(res,req)=>{
+  res.sen("Hello world!")
+})
 
 app.get("/api/persons", (request, response) => {
   response.json(persons);
