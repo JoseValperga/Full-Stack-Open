@@ -22,8 +22,13 @@ const addPerson = (
       formService
         .update(personObject)
         .then((updatedPerson) => {
-          const response = formService.updateObject(updatedPerson, persons);
-
+          const response = persons.map((item) => {
+            if (item.id === updatedPerson.id) {
+              return updatedPerson;
+            } else {
+              return item;
+            }
+          });
           setPersons(response);
           setFilteredPersons(response);
 
