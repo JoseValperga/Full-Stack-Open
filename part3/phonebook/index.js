@@ -1,22 +1,26 @@
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001;
 const morgan = require("morgan");
-const cors = require('cors')
+const cors = require("cors");
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
-app.use(express.static('dist'))
+app.use(express.static("dist"));
 
-morgan.token('req-body', (req) => {
-  if(req.method === 'POST') {
+morgan.token("req-body", (req) => {
+  if (req.method === "POST") {
     return JSON.stringify(req.body);
   } else {
-    return '';
+    return "";
   }
 });
 
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :req-body'));
+app.use(
+  morgan(
+    ":method :url :status :res[content-length] - :response-time ms - :req-body"
+  )
+);
 
 let persons = [
   {
@@ -40,10 +44,6 @@ let persons = [
     number: "39-23-6423122",
   },
 ];
-
-app.get("/",(request,response)=>{
-  response.send("Hello world!")
-})
 
 app.get("/api/persons", (request, response) => {
   response.json(persons);
@@ -69,7 +69,8 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const { id } = request.params;
+  const id = Number(request.params.id);
+
   persons = persons.filter((person) => person.id !== id);
   response.status(204).end();
 });
@@ -82,16 +83,29 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({ error: "Missing name or number" });
   }
 
-  if (persons.some((existingPerson) => existingPerson.name === name)) {
-    return response.status(409).json({ error: "Name must be unique" });
-  }
-
   const newPerson = { name, number };
   newPerson.id = Math.trunc(Math.random() * 10000);
-  persons.push(newPerson);
+  persons = persons.concat(newPerson);
   response.status(201).json(newPerson);
 });
 
+app.put("/api/persons", (request, response) => {
+  const newPerson = request.body;
+  const { name, number } = newPerson;
+
+  if (!name || !number) {
+    return response.status(400).json({ error: "Missing name or number" });
+  }
+
+  persons = persons.map((item) => {
+    if (item.id === newPerson.id) {
+      return newPerson;
+    } else {
+      return item;
+    }
+  });
+  response.status(201).json(newPerson);
+});
 
 app.listen(PORT);
 console.log(`Server running on port ${PORT}`);
