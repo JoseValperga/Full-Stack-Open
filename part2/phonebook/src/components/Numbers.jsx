@@ -6,20 +6,24 @@ const Numbers = ({
   persons,
   setPersons,
   setFilteredPersons,
-  setErrorMessage
+  setErrorMessage,
 }) => {
   const idPersonToDelete = ({ id, name }) => {
     if (window.confirm(`Delete ${name}?`))
-      formService.deletePerson(id).then((respuesta) => {
-        setPersons(persons.filter((n) => n.id !== respuesta.id));
-        setFilteredPersons(
-          filteredPersons.filter((n) => n.id !== respuesta.id)
-        );
-      }).catch((error)=>{
-        setErrorMessage(error.message);
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000);});
+      formService
+        .deletePerson(id)
+        .then(() => {
+          const temp = persons.filter((n) => n.id !== id);
+          const temp_2 = filteredPersons.filter((n) => n.id !== id)
+          setPersons(temp);
+          setFilteredPersons(temp_2);
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
+        });
   };
 
   return (

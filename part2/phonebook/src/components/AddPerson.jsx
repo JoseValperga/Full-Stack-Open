@@ -20,20 +20,22 @@ const addPerson = (
       )
     ) {
       formService
-        .update(personObject.id, personObject)
+        .update(personObject)
         .then((updatedPerson) => {
           const response = formService.updateObject(updatedPerson, persons);
+
           setPersons(response);
           setFilteredPersons(response);
+
           setAddedMessage(
-            `Note '${personObject.name}' numbre was changed into the server`
+            `Note '${personObject.name}' number was changed into the server`
           );
           setTimeout(() => {
             setAddedMessage(null);
           }, 5000);
         })
         .catch((error) => {
-          setErrorMessage(error.message);
+          setErrorMessage(error.response.data.error);
           setTimeout(() => {
             setErrorMessage(null);
           }, 5000);
@@ -55,7 +57,7 @@ const addPerson = (
       }, 5000);
     })
     .catch((error) => {
-      setErrorMessage(error.message);
+      setErrorMessage(error.response.data.error);
       setTimeout(() => {
         setErrorMessage(null);
       }, 5000);
