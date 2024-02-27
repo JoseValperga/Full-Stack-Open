@@ -14,7 +14,15 @@ mongoose
 
 const personSchema = new mongoose.Schema({
   name: { type: String, minLength: 5, required: true },
-  number: { type: String, minLength: 5, required: true },
+  number: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        return /^[0-9]{2,3}-[0-9]{8,}$/.test(v);
+      },
+    },
+    required: true,
+  },
   date: {
     type: Date,
     default: Date.now,
