@@ -94,11 +94,11 @@ app.delete("/api/persons/:id", (request, response, next) => {
 
 app.post("/api/persons", (request, response, next) => {
   const { name, number } = request.body;
- 
+
   if (!name || !number) {
     return response.status(400).send({ error: "Missing name or number" });
   }
-  
+
   const person = new Person({ name, number });
 
   person
