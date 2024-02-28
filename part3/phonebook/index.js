@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const express = require("express");
 const app = express();
 require("dotenv").config();
@@ -19,7 +21,7 @@ const errorHandler = (error, request, response, next) => {
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
   } else if (error.name === "ValidationError") {
-    console.log("Error", error.errors)
+    console.log("Error", error.errors);
     return response.status(400).json({ error: error.name });
   }
   next(error);
