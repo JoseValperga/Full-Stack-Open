@@ -1,19 +1,14 @@
-const app = require("./app")
 const { PORT, MONGODB_URI } = require("./utils/config")
-const logger = require("./utils/logger")
-app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`)
-})
-/*
-
-
 const express = require('express')
 const app = express()
 const cors = require('cors')
 const blogRoutes = require("./controllers/blogs")
-const Blog = require("./models/blog")
+const middleware = require("./utils/middleware")
+//const Blog = require("./models/blog")
 
+const logger = require("./utils/logger")
 const mongoose = require('mongoose')
+
 mongoose.set("strictQuery", false);
 
 logger.info("connecting to", MONGODB_URI);
@@ -30,5 +25,11 @@ mongoose
 app.use(cors())
 app.use(express.static("dist"));
 app.use(express.json())
+app.use(middleware.requestLogger)
 app.use('/api/blogs', blogRoutes)
-*/
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
+
+module.exports = app
+
+
