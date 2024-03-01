@@ -1,8 +1,9 @@
+// eslint-disable-next-line no-unused-vars
 const dummy = (blogs) => {
   return 1;
 };
 
-const totalLikes = (blogList)=>{
+const totalLikes = (blogList) => {
   let total = blogList.reduce((acumulador, objeto) => acumulador + objeto.likes, 0);
   return total;
 
