@@ -69,7 +69,7 @@ describe("total likes", () => {
 
 describe("favorite blog", () => {
 
-  test("when list has only one blog, equals the likes of that", () => {
+  test("when list has only one blog, equals the likes of that READY", () => {
     const favorite = {
       _id: "5a422b3a1b54a676234d17f9",
       title: "Canonical string reduction",

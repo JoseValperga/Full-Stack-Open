@@ -53,15 +53,17 @@ const mostBlogs = (blogList) => {
   let result = [{ author: blogList[0].author, blogs: 1 }];
 
   for (let i = 1; i < blogList.length; i++) {
+    let found = false;
     for (let j = 0; j < result.length; j++) {
-        console.log(result)
-      blogList[i].author === result[j].author
-        ? result[j].blogs++
-        : result.push({ author: blogList[i].author, blogs: 1 });
-    
+      if (blogList[i].author === result[j].author) {
+        result[j].blogs++;
+        found = true;
+      }
     }
+    if (!found) result.push({ author: blogList[i].author, blogs: 1 });
   }
   return result;
+
 };
 
 console.log(mostBlogs(blogList));
