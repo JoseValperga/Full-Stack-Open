@@ -49,22 +49,27 @@ const blogList = [
   },
 ];
 
-const mostBlogs = (blogList) => {
-  let result = [{ author: blogList[0].author, blogs: 1 }];
-
+const mostLikes = (blogList) => {
+  let result = [{ author: blogList[0].author, likes: blogList[0].likes }];
   for (let i = 1; i < blogList.length; i++) {
     let found = false;
     for (let j = 0; j < result.length; j++) {
       if (blogList[i].author === result[j].author) {
-        result[j].blogs++;
+        result[j].likes += blogList[i].likes;
         found = true;
       }
     }
-    if (!found) result.push({ author: blogList[i].author, blogs: 1 });
+    if (!found) result.push({ author: blogList[i].author, likes: blogList[i].likes });
   }
-  return result;
+  let mostLikes = result[0];
+  for (let i = 1; i < result.length; i++) {
+    if (mostLikes.likes < result[i].likes) {
+      mostLikes = result[i];
+    }
+  }
+  return mostLikes;
 
 };
 
-console.log(mostBlogs(blogList));
+console.log(mostLikes(blogList));
 

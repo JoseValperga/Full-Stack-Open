@@ -69,7 +69,7 @@ describe("total likes", () => {
 
 describe("favorite blog", () => {
 
-  test("when list has only one blog, equals the likes of that READY", () => {
+  test("when list has only one blog, equals the likes of that", () => {
     const favorite = {
       _id: "5a422b3a1b54a676234d17f9",
       title: "Canonical string reduction",
@@ -84,3 +84,24 @@ describe("favorite blog", () => {
 
 });
 
+describe("most blogs", () => {
+  test("when list has only one blog, equals the blogs of that", () => {
+    const mostBlogs = {
+      author: "Robert C. Martin",
+      blogs: 3
+    };
+    const result = listHelper.mostBlogs(blogs);
+    expect(result).toEqual(mostBlogs);
+  });
+});
+
+describe("most likes", () => {
+  test("when list has only one blog, equals the likes of that", () => {
+    const mostLikes = {
+      author: "Edsger W. Dijkstra",
+      likes: 17
+    };
+    const result = listHelper.mostLikes(blogs);
+    expect(result).toEqual(mostLikes);
+  });
+});
