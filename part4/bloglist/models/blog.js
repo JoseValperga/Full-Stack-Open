@@ -1,9 +1,16 @@
 const mongoose = require("mongoose");
 
+const validateURL = (url) => {const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+  return urlRegex.test(url);
+};
+
 const blogSchema = new mongoose.Schema({
   title: { type: String, required: true },
   author: { type: String, required: true },
-  url: { type: String, required: true },
+  url: { type: String, required: true,validate: {
+    validator: validateURL,
+    message: "Invalid URL"
+  } },
   likes: { type: Number, default: 0 },
 });
 
