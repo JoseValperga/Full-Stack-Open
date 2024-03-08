@@ -6,12 +6,14 @@ const initialBlogs = [
     author: "Josefer",
     url: "http://josefer.com.ar",
     likes: 5,
+    userId:"65ea4d3e5f1fb46f18f638f0",
   },
   {
     title: "Prueba 2",
     author: "Annie",
     url: "http://annie.com.ar",
     likes: 5,
+    userId:"65ea4d3f5f1fb46f18f638f5",
   },
 ];
 

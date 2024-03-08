@@ -1,6 +1,16 @@
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const blogRoutes = require("express").Router();
 const Blog = require("../models/blog");
 const User = require("../models/user");
+
+const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.startsWith("Bearer ")) {
+    return authorization.replace("Bearer ", "");
+  }
+  return null;
+};
 
 blogRoutes.get("/", async (request, response) => {
   const blogs = await Blog.find({}).populate("user", { username:1,user:1 });
@@ -8,11 +18,16 @@ blogRoutes.get("/", async (request, response) => {
 });
 
 blogRoutes.post("/", async (request, response) => {
-  const { title, author, url, userId } = request.body;
-  const user = await User.findById(userId);
+  const { title, author, url } = request.body;
+
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: "token invalid" });
+  }
+  const user = await User.findById(decodedToken.id);
 
   const blog = new Blog({
-    title, author, url, user: user.id
+    title, author, url, user: user._id
   });
 
   const result = await blog.save();

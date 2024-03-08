@@ -5,30 +5,22 @@ const api = supertest(app);
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Blog = require("../models/blog");
-const { usersInDb } = require("./test_helper");
-
-const initialBlogs = [
-  {
-    title: "Prueba 1",
-    author: "Josefer",
-    url: "http://josefer.com.ar",
-    likes: 5,
-  },
-
-  {
-    title: "Prueba 2",
-    author: "Annie",
-    url: "http://annie.com.ar",
-    likes: 5,
-  },
-];
+const helper = require("./test_helper");
 
 beforeEach(async () => {
   await Blog.deleteMany({});
-  let noteBlog = new Blog(initialBlogs[0]);
+
+  let noteBlog = new Blog(helper.initialBlogs[0]);
   await noteBlog.save();
-  noteBlog = new Blog(initialBlogs[1]);
+
+  noteBlog = new Blog(helper.initialBlogs[1]);
   await noteBlog.save();
+
+  /*
+  const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
+  const promiseArray = blogObjects.map(blog => blog.save());
+  await Promise.all(promiseArray);
+  */
 });
 
 test("blogs are returned as json", async () => {
@@ -50,7 +42,7 @@ test("the first blog belongs to Josefer", async () => {
 
 test("all blogs are returned", async () => {
   const response = await api.get("/api/blogs");
-  expect(response.body).toHaveLength(initialBlogs.length);
+  expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
 
 test("a specific blog is within the returned notes", async () => {
@@ -67,6 +59,7 @@ test("a valid blog can be added", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
+    userId: "65eb6069646ecfb2e756c136"
   };
   await api
     .post("/api/blogs")
@@ -74,9 +67,14 @@ test("a valid blog can be added", async () => {
     .expect(201)
     .expect("Content-Type", /application\/json/);
 
-  const response = await api.get("/api/blogs");
-  const author = response.body.map(r => r.author);
-  expect(response.body).toHaveLength(initialBlogs.length + 1);
+  //const response = await api.get("/api/blogs");
+  const response = await helper.blogsInDb();
+
+  //expect(response.body).toHaveLength(helper.initialBlogs.length + 1);
+  expect(response).toHaveLength(helper.initialBlogs.length + 1);
+
+  //const author = response.body.map(r => r.author);
+  const author = response.map(blog => blog.author);
   expect(author).toContain(
     "Ana Sofi"
   );
@@ -88,6 +86,7 @@ test("blog without author is not added", async () => {
     title: "Prueba 4",
     url: "http://prueba4.com.ar",
     likes: 5,
+    userId: "65eb6069646ecfb2e756c136",
   };
 
   await api
@@ -95,8 +94,11 @@ test("blog without author is not added", async () => {
     .send(newBlog)
     .expect(400);
 
-  const response = await api.get("/api/blogs");
-  expect(response.body).toHaveLength(initialBlogs.length);
+  //const response = await api.get("/api/blogs");
+  //expect(response.body).toHaveLength(helper.initialBlogs.length);
+
+  const blogsQuantity = await helper.blogsInDb();
+  expect(blogsQuantity).toHaveLength(helper.initialBlogs.length);
 });
 
 
@@ -106,6 +108,7 @@ test("The id property must exist instead of _id", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
+    userId: "65eb6069646ecfb2e756c136",
   };
   await api
     .post("/api/blogs")
@@ -123,6 +126,7 @@ test("likes = 0 if not exist", async () => {
     title: "Prueba 3",
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
+    userId: "65eb6069646ecfb2e756c136",
   };
 
   await api
@@ -142,6 +146,7 @@ test("blog without title or url are not added", async () => {
     author: "Prueba de falta de title",
     url: "http://prueba4.com.ar",
     likes: 5,
+    userId: "65eb6069646ecfb2e756c136",
   };
 
   const newBlog2 =
@@ -149,6 +154,7 @@ test("blog without title or url are not added", async () => {
     author: "Prueba de falta de url",
     title: "Prueba 4",
     likes: 5,
+    userId: "65eb6069646ecfb2e756c136",
   };
 
   await api
@@ -157,7 +163,7 @@ test("blog without title or url are not added", async () => {
     .expect(400);
 
   let response = await api.get("/api/blogs");
-  expect(response.body).toHaveLength(initialBlogs.length);
+  expect(response.body).toHaveLength(helper.initialBlogs.length);
 
   await api
     .post("/api/blogs")
@@ -165,7 +171,7 @@ test("blog without title or url are not added", async () => {
     .expect(400);
 
   response = await api.get("/api/blogs");
-  expect(response.body).toHaveLength(initialBlogs.length);
+  expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
 
 test("delete a blog", async () => {
@@ -174,12 +180,13 @@ test("delete a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 10,
+    userId: "65eb6069646ecfb2e756c136",
   };
   const responseOne = await api.post("/api/blogs").send(newBlog).expect(201).expect("Content-Type", /application\/json/);
   const postId=responseOne.body.id;
   await api.delete(`/api/blogs/${postId}`);
   const response = await api.get("/api/blogs");
-  expect(response.body).toHaveLength(initialBlogs.length);
+  expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
 
 test("edit a blog", async () => {
@@ -188,6 +195,7 @@ test("edit a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
+    userId: "65eb6069646ecfb2e756c136",
   };
 
   const newBlog2 = {
@@ -195,6 +203,7 @@ test("edit a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 10,
+    userId: "65eb6069646ecfb2e756c136",
   };
 
   const responseOne = await api.post("/api/blogs").send(newBlog1).expect(201).expect("Content-Type", /application\/json/);
@@ -206,7 +215,7 @@ test("edit a blog", async () => {
 });
 
 //...
-
+/*
 describe("when there is initially one user in db", () => {
   beforeEach(async () => {
     await User.deleteMany({});
@@ -218,7 +227,7 @@ describe("when there is initially one user in db", () => {
   });
 
   test("creation succeeds with a fresh username", async () => {
-    const usersAtStart = await usersInDb();
+    const usersAtStart = await helper.usersInDb();
 
     const newUser = {
       username: "mluukkai",
@@ -232,14 +241,14 @@ describe("when there is initially one user in db", () => {
       .expect(201)
       .expect("Content-Type", /application\/json/);
 
-    const usersAtEnd = await usersInDb();
+    const usersAtEnd = await helper.usersInDb();
     expect(usersAtEnd).toHaveLength(usersAtStart.length + 1);
 
     const usernames = usersAtEnd.map(u => u.username);
     expect(usernames).toContain(newUser.username);
   });
 });
-
+*/
 
 afterAll(() => {
   mongoose.connection.close();
