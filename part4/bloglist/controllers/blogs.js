@@ -20,6 +20,7 @@ blogRoutes.get("/", async (request, response) => {
 blogRoutes.post("/", async (request, response) => {
   const { title, author, url } = request.body;
 
+  // eslint-disable-next-line no-undef
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
   if (!decodedToken.id) {
     return response.status(401).json({ error: "token invalid" });

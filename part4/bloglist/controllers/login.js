@@ -1,4 +1,5 @@
 require("dotenv").config();
+// eslint-disable-next-line no-undef
 const SECRET = process.env.SECRET;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
