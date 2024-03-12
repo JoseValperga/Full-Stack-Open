@@ -6,6 +6,51 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Blog = require("../models/blog");
 const helper = require("./test_helper");
+let loginToken;
+
+describe("when there is initially one user in db", () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+
+    const passwordHash = await bcrypt.hash("sekret", 10);
+    const user = new User({ username: "root", passwordHash });
+
+    await user.save();
+  });
+
+  test("creation succeeds with a fresh username", async () => {
+    const usersAtStart = await helper.usersInDb();
+    const newUser = {
+      username: "mluukkai",
+      name: "Matti Luukkainen",
+      password: "salainen",
+    };
+
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1);
+
+    const usernames = usersAtEnd.map(u => u.username);
+    expect(usernames).toContain(newUser.username);
+  }, 100000);
+});
+
+test("login user with jwt", async () => {
+  const conectado = await api
+    .post("/api/login")
+    .send({
+      username: "mluukkai",
+      password: "salainen",
+    })
+    .expect(200);
+  loginToken = conectado.body.token;
+
+});
 
 beforeEach(async () => {
   await Blog.deleteMany({});
@@ -24,6 +69,7 @@ beforeEach(async () => {
 });
 
 test("blogs are returned as json", async () => {
+  console.log("token en returned blogs", loginToken);
   await api
     .get("/api/blogs")
     .expect(200)
@@ -31,6 +77,7 @@ test("blogs are returned as json", async () => {
 }, 100000);
 
 test("there are two notes", async () => {
+  console.log("token en two notes", loginToken);
   const response = await api.get("/api/blogs");
   expect(response.body).toHaveLength(2);
 });
@@ -183,7 +230,7 @@ test("delete a blog", async () => {
     userId: "65eb6069646ecfb2e756c136",
   };
   const responseOne = await api.post("/api/blogs").send(newBlog).expect(201).expect("Content-Type", /application\/json/);
-  const postId=responseOne.body.id;
+  const postId = responseOne.body.id;
   await api.delete(`/api/blogs/${postId}`);
   const response = await api.get("/api/blogs");
   expect(response.body).toHaveLength(helper.initialBlogs.length);
@@ -207,48 +254,12 @@ test("edit a blog", async () => {
   };
 
   const responseOne = await api.post("/api/blogs").send(newBlog1).expect(201).expect("Content-Type", /application\/json/);
-  const postId=responseOne.body.id;
-  newBlog2.id=postId;
+  const postId = responseOne.body.id;
+  newBlog2.id = postId;
   const responseTwo = await api.put("/api/blogs").send(newBlog2).expect(202).expect("Content-Type", /application\/json/);
   expect(responseTwo.body.title).toEqual("Prueba 4");
   expect(responseTwo.body.likes).toEqual(10);
 });
-
-//...
-/*
-describe("when there is initially one user in db", () => {
-  beforeEach(async () => {
-    await User.deleteMany({});
-
-    const passwordHash = await bcrypt.hash("sekret", 10);
-    const user = new User({ username: "root", passwordHash });
-
-    await user.save();
-  });
-
-  test("creation succeeds with a fresh username", async () => {
-    const usersAtStart = await helper.usersInDb();
-
-    const newUser = {
-      username: "mluukkai",
-      name: "Matti Luukkainen",
-      password: "salainen",
-    };
-
-    await api
-      .post("/api/users")
-      .send(newUser)
-      .expect(201)
-      .expect("Content-Type", /application\/json/);
-
-    const usersAtEnd = await helper.usersInDb();
-    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1);
-
-    const usernames = usersAtEnd.map(u => u.username);
-    expect(usernames).toContain(newUser.username);
-  });
-});
-*/
 
 afterAll(() => {
   mongoose.connection.close();
