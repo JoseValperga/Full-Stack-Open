@@ -150,10 +150,9 @@ test("blog without author is not added", async () => {
   expect(blogsQuantity).toHaveLength(helper.initialBlogs.length);
 });
 
-
 test("The id property must exist instead of _id", async () => {
   const newBlog = {
-    title: "Prueba 3",
+    title: "Prueba 5",
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
@@ -173,7 +172,7 @@ test("The id property must exist instead of _id", async () => {
 
 test("likes = 0 if not exist", async () => {
   const newBlog = {
-    title: "Prueba 3",
+    title: "Prueba 6",
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     userId: loginUser,
@@ -190,7 +189,6 @@ test("likes = 0 if not exist", async () => {
   expect(response.body[2].likes).toEqual(0);
 });
 
-
 test("blog without title or url are not added", async () => {
   const newBlog1 =
   {
@@ -203,7 +201,7 @@ test("blog without title or url are not added", async () => {
   const newBlog2 =
   {
     author: "Prueba de falta de url",
-    title: "Prueba 4",
+    title: "Prueba 7",
     likes: 5,
     userId: loginUser,
   };
@@ -227,31 +225,72 @@ test("blog without title or url are not added", async () => {
   expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
 
-test("delete a blog", async () => {
-  const newBlog = {
-    title: "Prueba 3",
-    author: "Ana Sofi",
-    url: "http://anasofi.com.ar",
-    likes: 10,
-    userId: loginUser
-  };
-  const responseOne = await api
-    .post("/api/blogs")
-    .set("Authorization", `Bearer ${loginToken}`)
-    .send(newBlog)
-    .expect(201)
-    .expect("Content-Type", /application\/json/);
-  const postId = responseOne.body.id;
-  await api
-    .delete(`/api/blogs/${postId}`)
-    .set("Authorization", `Bearer ${loginToken}`);
-  const response = await api.get("/api/blogs");
-  expect(response.body).toHaveLength(helper.initialBlogs.length);
+describe("deleting blogs", () => {
+  test("delete a blog", async () => {
+    const newBlog = {
+      title: "Prueba 8",
+      author: "Ana Sofi",
+      url: "http://anasofi.com.ar",
+      likes: 10,
+      userId: loginUser
+    };
+    const responseOne = await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${loginToken}`)
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+    const postId = responseOne.body.id;
+    await api
+      .delete(`/api/blogs/${postId}`)
+      .set("Authorization", `Bearer ${loginToken}`);
+    const response = await api.get("/api/blogs");
+    expect(response.body).toHaveLength(helper.initialBlogs.length);
+  });
+
+  test("only the creator can delete the blog", async () => {
+    const qblogsInDb = await helper.blogsInDb();
+
+    const newBlog = {
+      title: "Prueba 9",
+      author: "Ana Sofi",
+      url: "http://anasofi.com.ar",
+      likes: 10,
+      userId: loginUser
+    };
+
+    const responseOne = await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${loginToken}`)
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const postId = responseOne.body.id;
+
+    const conectado = await api
+      .post("/api/login")
+      .send({
+        username: "root",
+        password: "sekret",
+      })
+      .expect(200);
+
+    const loginToken2 = conectado.body.token;
+
+    await api
+      .delete(`/api/blogs/${postId}`)
+      .set("Authorization", `Bearer ${loginToken2}`)
+      .expect(401);
+
+    const response = await api.get("/api/blogs");
+    expect(response.body).toHaveLength(qblogsInDb.length+1);
+  });
 });
 
 test("edit a blog", async () => {
   const newBlog1 = {
-    title: "Prueba 3",
+    title: "Prueba 10",
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
@@ -259,7 +298,7 @@ test("edit a blog", async () => {
   };
 
   const newBlog2 = {
-    title: "Prueba 4",
+    title: "Prueba 11",
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 10,
@@ -279,7 +318,7 @@ test("edit a blog", async () => {
     .set("Authorization", `Bearer ${loginToken}`)
     .send(newBlog2).expect(202)
     .expect("Content-Type", /application\/json/);
-  expect(responseTwo.body.title).toEqual("Prueba 4");
+  expect(responseTwo.body.title).toEqual("Prueba 11");
   expect(responseTwo.body.likes).toEqual(10);
 });
 

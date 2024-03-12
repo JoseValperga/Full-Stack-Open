@@ -5,7 +5,7 @@ const Blog = require("../models/blog");
 const User = require("../models/user");
 
 blogRoutes.get("/", async (request, response) => {
-  const blogs = await Blog.find({}).populate("user", { username:1,user:1 });
+  const blogs = await Blog.find({}).populate("user", { username: 1, user: 1 });
   return response.json(blogs);
 });
 
@@ -38,6 +38,12 @@ blogRoutes.delete("/:id", async (request, response) => {
   }
 
   const id = request.params.id;
+  const blogFound = await Blog.findById(id);
+
+  if (blogFound.user.toString() !== decodedToken.id.toString()) {
+    return response.status(401).end();
+  }
+
   await Blog.findByIdAndDelete(id);
   return response.status(204).end();
 });
