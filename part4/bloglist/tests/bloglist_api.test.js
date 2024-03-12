@@ -7,6 +7,7 @@ const User = require("../models/user");
 const Blog = require("../models/blog");
 const helper = require("./test_helper");
 let loginToken;
+let loginUser;
 
 describe("when there is initially one user in db", () => {
   beforeEach(async () => {
@@ -49,6 +50,7 @@ test("login user with jwt", async () => {
     })
     .expect(200);
   loginToken = conectado.body.token;
+  loginUser = conectado.body.id;
 
 });
 
@@ -69,7 +71,6 @@ beforeEach(async () => {
 });
 
 test("blogs are returned as json", async () => {
-  console.log("token en returned blogs", loginToken);
   await api
     .get("/api/blogs")
     .expect(200)
@@ -77,7 +78,6 @@ test("blogs are returned as json", async () => {
 }, 100000);
 
 test("there are two notes", async () => {
-  console.log("token en two notes", loginToken);
   const response = await api.get("/api/blogs");
   expect(response.body).toHaveLength(2);
 });
@@ -106,10 +106,11 @@ test("a valid blog can be added", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
-    userId: "65eb6069646ecfb2e756c136"
+    userId: loginUser
   };
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
     .send(newBlog)
     .expect(201)
     .expect("Content-Type", /application\/json/);
@@ -133,11 +134,12 @@ test("blog without author is not added", async () => {
     title: "Prueba 4",
     url: "http://prueba4.com.ar",
     likes: 5,
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser,
   };
 
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
     .send(newBlog)
     .expect(400);
 
@@ -155,10 +157,11 @@ test("The id property must exist instead of _id", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser,
   };
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
     .send(newBlog)
     .expect(201)
     .expect("Content-Type", /application\/json/);
@@ -173,11 +176,12 @@ test("likes = 0 if not exist", async () => {
     title: "Prueba 3",
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser,
   };
 
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
     .send(newBlog)
     .expect(201)
     .expect("Content-Type", /application\/json/);
@@ -193,7 +197,7 @@ test("blog without title or url are not added", async () => {
     author: "Prueba de falta de title",
     url: "http://prueba4.com.ar",
     likes: 5,
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser,
   };
 
   const newBlog2 =
@@ -201,11 +205,12 @@ test("blog without title or url are not added", async () => {
     author: "Prueba de falta de url",
     title: "Prueba 4",
     likes: 5,
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser,
   };
 
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
     .send(newBlog1)
     .expect(400);
 
@@ -214,6 +219,7 @@ test("blog without title or url are not added", async () => {
 
   await api
     .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
     .send(newBlog2)
     .expect(400);
 
@@ -227,11 +233,18 @@ test("delete a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 10,
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser
   };
-  const responseOne = await api.post("/api/blogs").send(newBlog).expect(201).expect("Content-Type", /application\/json/);
+  const responseOne = await api
+    .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
   const postId = responseOne.body.id;
-  await api.delete(`/api/blogs/${postId}`);
+  await api
+    .delete(`/api/blogs/${postId}`)
+    .set("Authorization", `Bearer ${loginToken}`);
   const response = await api.get("/api/blogs");
   expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
@@ -242,7 +255,7 @@ test("edit a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser
   };
 
   const newBlog2 = {
@@ -250,13 +263,22 @@ test("edit a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 10,
-    userId: "65eb6069646ecfb2e756c136",
+    userId: loginUser
   };
 
-  const responseOne = await api.post("/api/blogs").send(newBlog1).expect(201).expect("Content-Type", /application\/json/);
+  const responseOne = await api
+    .post("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
+    .send(newBlog1).expect(201)
+    .expect("Content-Type", /application\/json/);
+
   const postId = responseOne.body.id;
   newBlog2.id = postId;
-  const responseTwo = await api.put("/api/blogs").send(newBlog2).expect(202).expect("Content-Type", /application\/json/);
+  const responseTwo = await api
+    .put("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
+    .send(newBlog2).expect(202)
+    .expect("Content-Type", /application\/json/);
   expect(responseTwo.body.title).toEqual("Prueba 4");
   expect(responseTwo.body.likes).toEqual(10);
 });
