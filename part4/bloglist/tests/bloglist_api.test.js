@@ -7,7 +7,6 @@ const User = require("../models/user");
 const Blog = require("../models/blog");
 const helper = require("./test_helper");
 let loginToken;
-let loginUser;
 
 describe("when there is initially one user in db", () => {
   beforeEach(async () => {
@@ -49,9 +48,8 @@ test("login user with jwt", async () => {
       password: "salainen",
     })
     .expect(200);
+  console.log("conectado.body.id", conectado.body);
   loginToken = conectado.body.token;
-  loginUser = conectado.body.id;
-
 });
 
 beforeEach(async () => {
@@ -73,27 +71,36 @@ beforeEach(async () => {
 test("blogs are returned as json", async () => {
   await api
     .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`)
     .expect(200)
     .expect("Content-Type", /application\/json/);
 }, 100000);
 
 test("there are two notes", async () => {
-  const response = await api.get("/api/blogs");
+  const response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   expect(response.body).toHaveLength(2);
 });
 
 test("the first blog belongs to Josefer", async () => {
-  const response = await api.get("/api/blogs");
+  const response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   expect(response.body[0].author).toBe("Josefer");
 });
 
 test("all blogs are returned", async () => {
-  const response = await api.get("/api/blogs");
+  const response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
 
 test("a specific blog is within the returned notes", async () => {
-  const response = await api.get("/api/blogs");
+  const response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   const contents = response.body.map(r => r.author);
   expect(contents).toContain(
     "Annie"
@@ -106,7 +113,6 @@ test("a valid blog can be added", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
-    userId: loginUser
   };
   await api
     .post("/api/blogs")
@@ -115,10 +121,8 @@ test("a valid blog can be added", async () => {
     .expect(201)
     .expect("Content-Type", /application\/json/);
 
-  //const response = await api.get("/api/blogs");
-  const response = await helper.blogsInDb();
 
-  //expect(response.body).toHaveLength(helper.initialBlogs.length + 1);
+  const response = await helper.blogsInDb();
   expect(response).toHaveLength(helper.initialBlogs.length + 1);
 
   //const author = response.body.map(r => r.author);
@@ -134,7 +138,6 @@ test("blog without author is not added", async () => {
     title: "Prueba 4",
     url: "http://prueba4.com.ar",
     likes: 5,
-    userId: loginUser,
   };
 
   await api
@@ -156,7 +159,6 @@ test("The id property must exist instead of _id", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
-    userId: loginUser,
   };
   await api
     .post("/api/blogs")
@@ -165,7 +167,9 @@ test("The id property must exist instead of _id", async () => {
     .expect(201)
     .expect("Content-Type", /application\/json/);
 
-  const response = await api.get("/api/blogs");
+  const response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   expect(response.body[0].id).toBeDefined();
   expect(response.body[0]._id).not.toBeDefined();
 });
@@ -175,7 +179,6 @@ test("likes = 0 if not exist", async () => {
     title: "Prueba 6",
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
-    userId: loginUser,
   };
 
   await api
@@ -185,7 +188,9 @@ test("likes = 0 if not exist", async () => {
     .expect(201)
     .expect("Content-Type", /application\/json/);
 
-  const response = await api.get("/api/blogs");
+  const response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   expect(response.body[2].likes).toEqual(0);
 });
 
@@ -195,7 +200,6 @@ test("blog without title or url are not added", async () => {
     author: "Prueba de falta de title",
     url: "http://prueba4.com.ar",
     likes: 5,
-    userId: loginUser,
   };
 
   const newBlog2 =
@@ -203,7 +207,6 @@ test("blog without title or url are not added", async () => {
     author: "Prueba de falta de url",
     title: "Prueba 7",
     likes: 5,
-    userId: loginUser,
   };
 
   await api
@@ -212,7 +215,9 @@ test("blog without title or url are not added", async () => {
     .send(newBlog1)
     .expect(400);
 
-  let response = await api.get("/api/blogs");
+  let response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   expect(response.body).toHaveLength(helper.initialBlogs.length);
 
   await api
@@ -221,7 +226,9 @@ test("blog without title or url are not added", async () => {
     .send(newBlog2)
     .expect(400);
 
-  response = await api.get("/api/blogs");
+  response = await api
+    .get("/api/blogs")
+    .set("Authorization", `Bearer ${loginToken}`);
   expect(response.body).toHaveLength(helper.initialBlogs.length);
 });
 
@@ -232,7 +239,6 @@ describe("deleting blogs", () => {
       author: "Ana Sofi",
       url: "http://anasofi.com.ar",
       likes: 10,
-      userId: loginUser
     };
     const responseOne = await api
       .post("/api/blogs")
@@ -244,7 +250,9 @@ describe("deleting blogs", () => {
     await api
       .delete(`/api/blogs/${postId}`)
       .set("Authorization", `Bearer ${loginToken}`);
-    const response = await api.get("/api/blogs");
+    const response = await api
+      .get("/api/blogs")
+      .set("Authorization", `Bearer ${loginToken}`);
     expect(response.body).toHaveLength(helper.initialBlogs.length);
   });
 
@@ -256,7 +264,6 @@ describe("deleting blogs", () => {
       author: "Ana Sofi",
       url: "http://anasofi.com.ar",
       likes: 10,
-      userId: loginUser
     };
 
     const responseOne = await api
@@ -283,8 +290,10 @@ describe("deleting blogs", () => {
       .set("Authorization", `Bearer ${loginToken2}`)
       .expect(401);
 
-    const response = await api.get("/api/blogs");
-    expect(response.body).toHaveLength(qblogsInDb.length+1);
+    const response = await api
+      .get("/api/blogs")
+      .set("Authorization", `Bearer ${loginToken}`);
+    expect(response.body).toHaveLength(qblogsInDb.length + 1);
   });
 });
 
@@ -294,7 +303,6 @@ test("edit a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 5,
-    userId: loginUser
   };
 
   const newBlog2 = {
@@ -302,7 +310,6 @@ test("edit a blog", async () => {
     author: "Ana Sofi",
     url: "http://anasofi.com.ar",
     likes: 10,
-    userId: loginUser
   };
 
   const responseOne = await api

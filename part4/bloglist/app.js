@@ -25,12 +25,12 @@ mongoose
     logger.info("error connecting to MongoDB:", error.message);
   });
 
-app.use(middleware.tokenExtractor);
 app.use(cors());
 app.use(express.static("dist"));
 app.use(express.json());
+app.use(middleware.tokenExtractor);
 app.use(middleware.requestLogger);
-app.use("/api/blogs", blogRoutes);
+app.use("/api/blogs", middleware.userExtractor, blogRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/login", loginRouter);
 app.use(middleware.unknownEndpoint);

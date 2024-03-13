@@ -11,11 +11,20 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    validate: {
+      validator: function (value) {
+        return value.length >= 3;
+      },
+      message: "The username must be at least 3 characters long."
+    }
   },
   name: String,
-  passwordHash: String,
+  passwordHash: {
+    type: String, required: true,
+  }
 });
+
 userSchema.plugin(uniqueValidator);
 
 userSchema.set("toJSON", {
