@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
@@ -7,7 +7,13 @@ const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [newBlogForm, setNewBlogForm] = useState({
+    title: "",
+    author: "",
+    url: "",
+  });
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -17,7 +23,8 @@ const App = () => {
         username,
         password,
       });
-      setUser(user);
+      blogService.setToken(user.token)
+      setCurrentUser(user);
       setUsername("");
       setPassword("");
     } catch (exception) {
@@ -28,18 +35,8 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
-  /*
-  const handleLogin = (event) => {
-    event.preventDefault();
-    console.log("logging in with", username, password);
-  };
-*/
-  return (
-    <div>
-      <h2>blogs</h2>
+  const loginForm = () => {
+    return (
       <form onSubmit={handleLogin}>
         <div>
           username
@@ -61,9 +58,78 @@ const App = () => {
         </div>
         <button type="submit">login</button>
       </form>
-      {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
-      ))}
+    );
+  };
+
+  const handleBlogChange = (event) => {
+    const whoFiredEvent = event.target.name;
+    const valueEvent = event.target.value;
+    setNewBlogForm({ ...newBlogForm, [whoFiredEvent]: valueEvent });
+  };
+
+  const addform = async (event) => {
+    event.preventDefault();
+    const newBlog = await blogService.create(newBlogForm);
+    setBlogs([...blogs, newBlog]);
+    setNewBlogForm({ title: "", author: "", url: "" });
+  };
+
+  const blogForm = () => {
+    return (
+      <form onSubmit={addform}>
+        <div>
+          Title:
+          <input
+            type="text"
+            value={newBlogForm.title}
+            onChange={handleBlogChange}
+            name="title"
+          />
+        </div>
+        <div>
+          Author:
+          <input
+            type="text"
+            value={newBlogForm.author}
+            onChange={handleBlogChange}
+            name="author"
+          />
+        </div>
+        <div>
+          URL:
+          <input
+            type="text"
+            value={newBlogForm.url}
+            onChange={handleBlogChange}
+            name="url"
+          />
+        </div>
+        <button type="submit">Create Blog</button>
+      </form>
+    );
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      blogService.getAll().then((blogs) => setBlogs(blogs));
+    }
+  }, [currentUser]);
+
+  return (
+    <div>
+      <h2>blogs</h2>
+      {currentUser === null ? (
+        loginForm()
+      ) : (
+        <div>
+          {blogForm()}
+          <p>Welcome, {currentUser.username}!</p>
+          {blogs.map((blog) => (
+            <Blog key={blog.id} blog={blog} />
+          ))}
+        </div>
+      )}
+      {errorMessage && <p>{errorMessage}</p>}
     </div>
   );
 };
