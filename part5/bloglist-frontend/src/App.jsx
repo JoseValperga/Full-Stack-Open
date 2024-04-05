@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
@@ -32,31 +32,37 @@ const App = () => {
       setCurrentUser(user);
       setUsername("");
       setPassword("");
-    } catch (exception) {
-      setErrorMessage("Wrong credentials");
+    } catch (error) {
+      setErrorMessage(error.response.data.error);
       setTimeout(() => {
         setErrorMessage(null);
       }, 5000);
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     window.localStorage.removeItem("loggedBlogappUser");
     setCurrentUser(null);
-  };
+  }, []);
 
-  const handleBlogChange = (event) => {
-    const whoFiredEvent = event.target.name;
-    const valueEvent = event.target.value;
-    setNewBlogForm({ ...newBlogForm, [whoFiredEvent]: valueEvent });
-  };
+  const handleBlogChange = useCallback(
+    (event) => {
+      const whoFiredEvent = event.target.name;
+      const valueEvent = event.target.value;
+      setNewBlogForm({ ...newBlogForm, [whoFiredEvent]: valueEvent });
+    },
+    [newBlogForm]
+  );
 
-  const addform = async (event) => {
-    event.preventDefault();
-    const newBlog = await blogService.create(newBlogForm);
-    setBlogs([...blogs, newBlog]);
-    setNewBlogForm({ title: "", author: "", url: "" });
-  };
+  const addform = useCallback(
+    async (event) => {
+      event.preventDefault();
+      const newBlog = await blogService.create(newBlogForm);
+      setBlogs([...blogs, newBlog]);
+      setNewBlogForm({ title: "", author: "", url: "" });
+    },
+    [blogs, newBlogForm]
+  );
 
   useEffect(() => {
     if (currentUser) {
@@ -77,6 +83,7 @@ const App = () => {
 
   return (
     <div>
+      {errorMessage && <Notification errorMessage={errorMessage} />}
       {currentUser === null ? (
         <LoginForm
           username={username}
