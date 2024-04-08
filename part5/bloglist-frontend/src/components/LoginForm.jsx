@@ -1,5 +1,35 @@
+import blogService from "../services/blogs";
+import loginService from "../services/login";
 
-const LoginForm = ({ username, password, setUsername, setPassword, handleLogin }) => {
+const LoginForm = ({
+  username,
+  password,
+  setUsername,
+  setPassword,
+  setCurrentUser,
+  setErrorMessage,
+}) => {
+  const handleLogin = async (event) => {
+    event.preventDefault();
+
+    try {
+      const user = await loginService.login({
+        username,
+        password,
+      });
+      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
+      blogService.setToken(user.token);
+      setCurrentUser(user);
+      setUsername("");
+      setPassword("");
+    } catch (error) {
+      setErrorMessage(error.response.data.error);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+    }
+  };
+
   return (
     <div>
       <h2>log in to application</h2>
